@@ -1,0 +1,27 @@
+# Experiment options.
+exp_name: hc_pediatric_skipdensenet_all_resize_scratch_f0             # Experiment name.
+conv_name: skipdensenet                                               # Architecture [highresnet/mednet/skipdensenet/unet/vnet].
+fold_name: 0                                                          # Fold number [0-4].
+data_name: hc_pediatric                                               # Dataset name.
+task_name: all                                                        # Segmentation task.
+
+# Training params.
+epoch_num: 400                                                        # Number of training epochs.
+batch_size: 4                                                         # Mini-batch size.
+print_freq: 1                                                         # Loss printing frequency.
+test_freq: 80                                                         # Test each test_freq epochs.
+
+# Optimization options.
+lr: 0.01                                                              # Learning rate.
+weight_decay: 0.00005                                                 # L2 penalty.
+momentum: 0.5                                                         # Momentum.
+opt_step: 80                                                          # Optimizer step.
+opt_gamma: 0.5                                                        # Optimizer gamma.
+
+# Data options.
+root: /home/oliveirahugo/scratch/Datasets/                            # Root dir for datasets.
+patching: Resize                                                      # Preprocessing [SnS/Patch/Resize].
+num_workers: 8                                                        # Number of workers on data loader.
+w_size: 128                                                           # x-axis size for image resizing.
+h_size: 128                                                           # y-axis size for image resizing.
+z_size: 64                                                            # z-axis size for image resizing.
