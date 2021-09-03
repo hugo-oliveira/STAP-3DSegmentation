@@ -26,7 +26,7 @@ import list_dataset
 cudnn.benchmark = True
 
 # Predefining directories.
-ckpt_path = '/misc/users/oliveirahugo/Segmentation_3D/ckpt'
+ckpt_path = './ckpt'
 gif_path = './gifs'
 out_path = './outputs'
 
@@ -55,17 +55,13 @@ def main(config_path):
         
         net = HighRes3DNet(1, out_channels=num_classes)
         
-    elif (args['conv_name'] == 'livianet'):
-        
-        net = LiviaNet(1, num_classes=num_classes)
-        
-    elif (args['conv_name'] == 'resnet_vae'):
-        
-        net = ResNet3dVAE(1, num_classes=num_classes, dim=(args['h_size'], args['w_size'], args['z_size']))
-        
     elif (args['conv_name'] == 'skipdensenet'):
         
         net = SkipDenseNet3D(1, num_classes=num_classes)
+        
+    elif (args['conv_name'] == 'mednet'):
+        
+        net = ResNetMed3D(1, num_classes=num_classes)
         
     elif (args['conv_name'] == 'unet'):
         
@@ -117,8 +113,8 @@ def test(exp_name, test_loader, net, args):
             print('    Test Sample %d/%d: "%s"' % (i + 1, len(test_loader), img_name[0]))
             sys.stdout.flush()
             
-            # Stitching algorithm.
-            inps_full, labs_full, prds_full = list_dataset.sticthing_tst(net, inps_list, labs_list, off_list, size_list, strides, orig_shape)
+            # Resizing algorithm.
+            inps_full, labs_full, prds_full = list_dataset.resize_reconstruction(net, inps_list, labs_list, off_list, size_list, strides, orig_shape)
             
             # Appending label and prediction lists for computing metrics.
             labs_all.extend(labs_full.ravel().tolist())

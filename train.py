@@ -26,9 +26,9 @@ import list_dataset
 cudnn.benchmark = True
 
 # Predefining directories.
-ckpt_path = '/misc/users/oliveirahugo/Segmentation_3D/ckpt'
-gif_path = '/misc/users/oliveirahugo/Segmentation_3D/gifs'
-out_path = '/misc/users/oliveirahugo/Segmentation_3D/outputs'
+ckpt_path = './ckpt'
+gif_path = './gifs'
+out_path = './outputs'
 
 # Reading config file path.
 assert len(sys.argv) >= 2
@@ -61,17 +61,13 @@ def main(config_path):
         
         net = HighRes3DNet(1, out_channels=num_classes)
         
-    elif (args['conv_name'] == 'livianet'):
-        
-        net = LiviaNet(1, num_classes=num_classes)
-        
-    elif (args['conv_name'] == 'resnet_vae'):
-        
-        net = ResNet3dVAE(1, num_classes=num_classes, dim=(args['h_size'], args['w_size'], args['z_size']))
-        
     elif (args['conv_name'] == 'skipdensenet'):
         
         net = SkipDenseNet3D(1, num_classes=num_classes)
+        
+    elif (args['conv_name'] == 'mednet'):
+        
+        net = ResNetMed3D(1, num_classes=num_classes)
         
     elif (args['conv_name'] == 'unet'):
         
@@ -83,7 +79,7 @@ def main(config_path):
         
     
     net = net.cuda()
-    net = nn.DataParallel(net)
+#     net = nn.DataParallel(net) # Uncomment for multi-GPU training.
     print(net)
     print('%d trainable parameters...' % (sum(p.numel() for p in net.parameters() if p.requires_grad)))
     sys.stdout.flush()
@@ -184,45 +180,15 @@ def train(exp_name, train_loader, net, weights, optimizer, epoch, args, generate
         # Forwarding.
         outs = net(inps)
         
-        # Computing predictions and loss(es).
-        if args['conv_name'] == 'resnet_vae':
-            
-            # Computing prediction.
-            prds = outs[0].data.max(1)[1].squeeze().cpu().numpy()
-            
-            # Supervised loss component.
-            sup_outs_linear = outs[0].permute(0, 2, 3, 4, 1).contiguous().view(-1, outs[0].size(1))
-            labs_linear = labs.view(-1)
-            
-            sup_loss = F.cross_entropy(sup_outs_linear, labs_linear, weight=weights) + \
-                       dice_loss(sup_outs_linear, labs_linear, num_classes=train_loader.dataset.num_classes, weight=weights)
-            
-            # Reconstruction loss component.
-            rec_outs = outs[1]
-            mu_outs = outs[2]
-            logvar_outs = outs[3]
-            print('inps', inps.min().item(), inps.max().item(), inps.size())
-            print('rec_outs', rec_outs.min().item(), rec_outs.max().item(), rec_outs.size())
-            print('mu_outs', mu_outs.min().item(), mu_outs.max().item(), mu_outs.size())
-            print('logvar_outs', logvar_outs.min().item(), logvar_outs.max().item(), logvar_outs.size())
-            rec_loss, kld_loss = loss_vae(rec_outs, inps, mu_outs, logvar_outs, type='L2', h1=0.1, h2=0.1)
-            
-            print('sup loss', sup_loss.item(), 'rec loss', rec_loss.item(), 'kld loss', kld_loss.item())
-            
-            # Combining losses.
-            loss = sup_loss + rec_loss + kld_loss
-            
-        else:
-            
-            # Computing prediction.
-            prds = outs.data.max(1)[1].squeeze().cpu().numpy()
-            
-            # Supervised loss component.
-            outs_linear = outs.permute(0, 2, 3, 4, 1).contiguous().view(-1, outs.size(1))
-            labs_linear = labs.view(-1)
-            
-            loss = F.cross_entropy(outs_linear, labs_linear, weight=weights) + \
-                   dice_loss(outs_linear, labs_linear, num_classes=train_loader.dataset.num_classes, weight=weights)
+        # Computing prediction.
+        prds = outs.data.max(1)[1].squeeze().cpu().numpy()
+        
+        # Supervised loss component.
+        outs_linear = outs.permute(0, 2, 3, 4, 1).contiguous().view(-1, outs.size(1))
+        labs_linear = labs.view(-1)
+        
+        loss = F.cross_entropy(outs_linear, labs_linear, weight=weights) + \
+               dice_loss(outs_linear, labs_linear, num_classes=train_loader.dataset.num_classes, weight=weights)
         
         # Computing backpropagation and updating model.
         loss.backward()
@@ -297,17 +263,12 @@ def test(exp_name, test_loader, net, weights, optimizer, epoch, args, save_model
             print('    Test Sample %d/%d: "%s"' % (i + 1, len(test_loader), img_name[0]))
             sys.stdout.flush()
             
-            # Volume reconstruction algorithm.
+            # Volume reconstruction.
             inps_full = None
             labs_full = None
             prds_full = None
             
-            if args['patching'] == 'SnS':
-                inps_full, labs_full, prds_full = list_dataset.sticthing(net, inps_list, labs_list, off_list, size_list, strides, orig_shape)
-            elif args['patching'] == 'Patches':
-                inps_full, labs_full, prds_full = list_dataset.patch_reconstruction(net, inps_list, labs_list, off_list, size_list, strides, orig_shape, (args['h_size'], args['w_size'], args['z_size']))
-            elif args['patching'] == 'Resize':
-                inps_full, labs_full, prds_full = list_dataset.resize_reconstruction(net, inps_list, labs_list, off_list, size_list, strides, orig_shape)
+            inps_full, labs_full, prds_full = list_dataset.resize_reconstruction(net, inps_list, labs_list, off_list, size_list, strides, orig_shape)
             
             # Appending label and prediction lists for computing metrics.
             labs_all.extend(labs_full.ravel().tolist())
