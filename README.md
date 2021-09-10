@@ -1,4 +1,4 @@
-Pipeline for Posterior Fossa Segmentation
+STAP-3DSegmentation
 ================
 
 ### Description
