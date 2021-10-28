@@ -215,9 +215,9 @@ def train(exp_name, train_loader, net, weights, optimizer, epoch, args, generate
                 save_gif(out_img, out_prd, prd_path)
                 
                 # Saving niftis.
-                img_path = os.path.join(out_path, exp_name, img_name[0] + '_img.nii.gz')
-                lab_path = os.path.join(out_path, exp_name, img_name[0] + '_lab.nii.gz')
-                prd_path = os.path.join(out_path, exp_name, img_name[0] + '_prd.nii.gz')
+                img_path = os.path.join(out_path, exp_name, img_name[0].replace('nii.gz', '_img.nii.gz'))
+                lab_path = os.path.join(out_path, exp_name, img_name[0].replace('nii.gz', '_lab.nii.gz'))
+                prd_path = os.path.join(out_path, exp_name, img_name[0].replace('nii.gz', '_prd.nii.gz'))
                 
                 save_nifti(out_img, img_path)
                 save_nifti(out_lab, lab_path)

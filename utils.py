@@ -36,6 +36,11 @@ def get_config(config):
     with open(config, 'r') as stream:
         return yaml.load(stream)
 
+def save_new_config(config_data, path):
+    
+    with open(path, 'w') as f2:
+        yaml.dump(config_data, f2)
+
 def save_nifti(vol, path):
     
     vol_nifti = nib.nifti1.Nifti1Image(vol, None)

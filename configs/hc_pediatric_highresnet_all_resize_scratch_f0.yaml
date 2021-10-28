@@ -1,5 +1,5 @@
 # Experiment options.
-exp_name: hc_pediatric_highresnet_all_resize_scratch_f0               # Experiment name.
+exp_name: hc_pediatric_highresnet_all_resize_scratch_f0              # Experiment name.
 conv_name: highresnet                                                 # Architecture [highresnet/mednet/skipdensenet/unet/vnet].
 fold_name: 0                                                          # Fold number [0-4].
 data_name: hc_pediatric                                               # Dataset name.
@@ -19,7 +19,7 @@ opt_step: 80                                                          # Optimize
 opt_gamma: 0.5                                                        # Optimizer gamma.
 
 # Data options.
-root: /home/oliveirahugo/scratch/Datasets/                            # Root dir for datasets.
+root: ./datasets/                            # Root dir for datasets.
 patching: Resize                                                      # Preprocessing [SnS/Patch/Resize].
 num_workers: 8                                                        # Number of workers on data loader.
 w_size: 128                                                           # x-axis size for image resizing.
