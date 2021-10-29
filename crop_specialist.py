@@ -58,7 +58,7 @@ def crop_to_vol(img, lab, prd, valid_labels):
                    full_bbox[1]:full_bbox[4],
                    full_bbox[2]:full_bbox[5]]
     
-    
+    lab_crop[np.in1d(lab_crop, valid_labels).reshape(lab_crop.shape) == False] = 0
     counts = [np.count_nonzero(lab_crop == c) for c in range(4)]
     #print(float(counts[0] + counts[1] + counts[2]) / counts[3])
     return img_crop, lab_crop, full_bbox
@@ -103,8 +103,8 @@ for specialist_task, valid_labels in [('cerebellum', [3]), ('stem_ventricle', [1
     if not os.path.isdir(f'./bbox/{path}/ground_truths/all/'):
         os.mkdir(f'./bbox/{path}/ground_truths/all/')
 
-    for file_txt in glob.glob(f'{data_name}/*.txt'):
-        shutil.copyfile(file_txt, file_txt.replace(f'{data_name}/', f'./bbox/{path}/'))
+    for file_txt in glob.glob(f'bbox/{specialist_task}/*.txt'):
+        shutil.copyfile(file_txt, file_txt.replace(f'bbox/{specialist_task}/', f'./bbox/{path}/'))
     
     args_new = copy(args)
     args_new['data_name'] = path

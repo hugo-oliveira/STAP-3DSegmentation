@@ -13,12 +13,12 @@ def join_seg(prd_full, prd_cere, prd_vent, bbox_cere, bbox_vent):
              bbox_cere[1]:bbox_cere[4],
              bbox_cere[2]:bbox_cere[5]] = prd_cere
 
-    index = np.where(
-            prd_full[bbox_vent[0]:bbox_vent[3],
+    aux =  prd_full[bbox_vent[0]:bbox_vent[3],
                      bbox_vent[1]:bbox_vent[4],
-                     bbox_vent[2]:bbox_vent[5]] == 0
-        )
-    prd_full[index] = prd_vent[index]
+                     bbox_vent[2]:bbox_vent[5]] 
+    
+        
+    aux[aux == 0] = prd_vent[aux == 0]
 
     return prd_full
 
@@ -59,8 +59,8 @@ path = '%s_specialists_%s_f%d' % (args['data_name'], arch, fold_name)
 
 if not os.path.isdir(f'./prd_final/{path}/'):
     os.mkdir(f'./prd_final/{path}/')
-
-files = sorted([f for f in os.listdir('./outputs/hc_pediatric_cerebellum_highresnet_f0/') if os.path.isfile(os.path.join(prd_cere, f)) and re.match(r'.*_prd\.nii\.gz', f)])
+print(test_imgs)
+files = sorted([f for f in os.listdir('./outputs/hc_pediatric_cerebellum_highresnet_f0/') if os.path.isfile(os.path.join(prd_cere, f)) and re.match(r'.*_prd\.nii\.gz', f) and f.replace('_prd.nii.gz','') in test_imgs])
 
 csv_file_cere = open(coord_file_cere, 'r')
 csv_file_vent = open(coord_file_vent, 'r')
@@ -73,15 +73,15 @@ lines_vent = csv_file_vent.readlines()
 lista_vent = [i.split() for i in lines_vent]
 dir_vent = {i[0]: np.array(i[1:], dtype='int') for i in lista_vent}
 
-prds_np = []
-labs_np = []
+prds_all = []
+labs_all = []
 for i, f in enumerate(files):
-
+    print('%d/%d: "%s"' % (i + 1, len(files), f))
     lab_path = os.path.join(lab_dir, f.replace('_prd', ''))
     prd_full_path = os.path.join(prd_dir, f)
     prd_cere_path = os.path.join(prd_cere, f)
     prd_vent_path = os.path.join(prd_vent, f)
-
+    
     out_lab_path = os.path.join(f'./prd_final/{path}/', f)
     full = nib.load(prd_full_path)
     cere = nib.load(prd_cere_path)
@@ -94,16 +94,16 @@ for i, f in enumerate(files):
     vent_np = vent.get_fdata()
 
 
-    prds_all.extend(full.ravel().tolist())
-    labs_np.extend(lab_np.ravel().tolist())
-
-    img_join = join_seg(full_np, cere_np, vent_np, dir_cere[f], dir_vent[f])
+    prds_all.extend(full_np.ravel().tolist())
+    labs_all.extend(lab_np.ravel().tolist())
+    print(cere_np.shape, full_np.shape)
+    img_join = join_seg(full_np, cere_np, vent_np, dir_cere[f.replace('_prd', '')], dir_vent[f.replace('_prd', '')])
 
     save_nifti(img_join, out_lab_path)
 
 
 prds_np = np.asarray(prds_all).ravel()
-labs_np = np.asarray(lab_np).ravel()
+labs_np = np.asarray(labs_all).ravel()
 iou = metrics.jaccard_score(labs_np, prds_np, average='macro')
 dice = metrics.f1_score(labs_np, prds_np, average='macro')
 
