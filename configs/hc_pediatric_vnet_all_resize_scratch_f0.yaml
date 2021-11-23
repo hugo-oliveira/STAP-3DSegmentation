@@ -7,7 +7,7 @@ task_name: all                                                        # Segmenta
 
 # Training params.
 epoch_num: 400                                                        # Number of training epochs.
-batch_size: 4                                                         # Mini-batch size.
+batch_size: 2                                                         # Mini-batch size.
 print_freq: 1                                                         # Loss printing frequency.
 test_freq: 80                                                         # Test each test_freq epochs.
 

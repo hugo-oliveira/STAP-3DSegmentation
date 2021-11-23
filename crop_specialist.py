@@ -91,7 +91,7 @@ for specialist_task, valid_labels in [('cerebellum', [3]), ('stem_ventricle', [1
     path = '%s_%s_%s_f%d' % (args['data_name'], specialist_task, arch, fold_name)
     out_img_dir = f'./bbox/{path}/images/' 
     out_lab_dir = f'./bbox/{path}/ground_truths/all/' 
-    coord_file = f'./bbox/bboxes_{arch}_{specialist_task}.csv' 
+    coord_file = f'./bbox/bboxes_{arch}_{specialist_task}_{fold_name}.csv' 
     config_file_path = config_path[:-5] +  specialist_task + '.yaml'
     
     if not os.path.isdir(f'./bbox/{path}/'):
