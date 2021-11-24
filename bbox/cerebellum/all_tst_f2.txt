@@ -1,0 +1,6 @@
+04.nii.gz
+20.nii.gz
+22.nii.gz
+28.nii.gz
+30.nii.gz
+31.nii.gz

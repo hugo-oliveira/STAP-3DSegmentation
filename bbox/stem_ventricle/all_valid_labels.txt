@@ -1,0 +1,4 @@
+﻿background: 0->0
+4th ventricle: 1->1
+brain stem: 2->2
+cerebellum: 3->0

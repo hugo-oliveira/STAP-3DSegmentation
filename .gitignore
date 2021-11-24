@@ -139,8 +139,7 @@ cython_debug/
 
 # datasets
 datasets/
-bbox/
 notebooks/
-prd_final/
+
 log/
 outputs/
